@@ -66,6 +66,7 @@ hackathon\
 |-- README.md              GitHub overview and quick start.
 |-- requirements.txt       Python dependencies.
 |-- src\app.py             Main Streamlit application.
+|-- RUN_INSTRUCTIONS.txt   Local install, run, and usage steps.
 |-- data\
 |     |-- bookings.csv and blocked_users.csv (local, ignored by Git)
 |     |-- timetables\
@@ -393,16 +394,13 @@ The following points should be addressed before production use:
      Demo users and plain-text passwords are hard-coded in app.py.
      Replace these with a secure identity provider or a database with
      hashed passwords and role-based authorization. Student access
-     blocks are enforced for this local demo but are stored in CSV and
-     should move into the same authoritative identity store in a real
-     deployment.
+     blocks are enforced for this local demo and stored in
+     data/blocked_users.csv.
 
   2. Persistence and simultaneous bookings
-     CSV is suitable for a local demo, but it is not a transactional
-     database. Move to SQLite for a single-machine deployment or a
-     server database for multiple users. Add a transaction/unique
-     constraint or locking strategy to prevent simultaneous double
-     booking.
+     CSV storage is suitable only for local demonstration and does not
+     coordinate multiple users. Do not use this prototype for simultaneous
+     bookings by separate users or for real college operations.
 
   3. Room metadata
      Verify every room's capacity, projector, room type, location, and
@@ -435,10 +433,9 @@ The following points should be addressed before production use:
      period overlaps, weekday mapping, old time-format migration,
      login roles, and simultaneous booking behavior.
 
-  9. Privacy and deployment
-     Protect booking history and credentials, configure network access,
-     use HTTPS for remote use, and establish backups and retention
-     rules.
+  9. Privacy and backups
+     Protect local booking history and credentials. Establish backups
+     and retention rules before using real data.
 
 
 ======================================================================
@@ -453,7 +450,5 @@ data\bookings.csv stores reservations. Availability combines those inputs; the b
 form displays matching rooms, rechecks the selected room, saves the
 record, and makes it visible in the relevant history.
 
-The current project is suitable for local demonstration and continued
-development. It should not be treated as a secure production booking
-service until the authentication, data, timetable validation, and
-concurrent booking limitations above are addressed.
+The current project is a local prototype for demonstration and continued
+development. It is not a production booking service.
