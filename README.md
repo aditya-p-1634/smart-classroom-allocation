@@ -48,6 +48,18 @@ Open <http://localhost:8501>. The app creates the local CSV files under `data`
 when it runs. They are intentionally excluded from Git so personal or
 machine-specific booking records are not pushed to GitHub.
 
+## Deploy for shared access
+
+For an internet-accessible version with persistent shared bookings, follow
+[DEPLOYMENT_GUIDE.txt](DEPLOYMENT_GUIDE.txt). It uses Streamlit Community
+Cloud and Supabase. Configure the Supabase credentials in Streamlit Cloud
+Secrets; never commit the service-role key.
+
+**Public demo warning:** anyone with the public app link can use the built-in
+demo accounts. Their credentials are included below and in the source, so an
+admin demo login allows blocking/unblocking students. This prototype is for
+demonstration, not real personal or college booking data.
+
 ## Demo accounts
 
 These built-in accounts are for demonstration only—not real credentials:
@@ -84,6 +96,8 @@ These built-in accounts are for demonstration only—not real credentials:
 ├── docs/
 │   ├── PROJECT_GUIDE.txt
 │   └── ROOM_AND_FACILITY_NOTES.txt
+├── supabase/
+│   └── schema.sql
 ├── requirements.txt
 ├── .gitignore
 └── README.md
@@ -93,8 +107,9 @@ These built-in accounts are for demonstration only—not real credentials:
 
 - Python
 - Streamlit for the web interface
-- pandas for CSV-backed booking data
+- pandas for local CSV-backed booking data
 - pdfplumber for extracting timetable information from PDFs
+- Supabase for shared cloud storage
 
 ## Current limitations
 

@@ -5,6 +5,9 @@ from datetime import datetime
 import pandas as pd
 import pdfplumber
 import streamlit as st
+from postgrest.exceptions import APIError
+from streamlit.errors import StreamlitSecretNotFoundError
+from supabase import create_client
 
 st.set_page_config(page_title="Smart Room Booking", page_icon="SRB", layout="wide")
 
@@ -562,6 +565,25 @@ BOOKINGS_FILE = os.path.join(DATA_DIR, "bookings.csv")
 BLOCKED_USERS_FILE = os.path.join(DATA_DIR, "blocked_users.csv")
 os.makedirs(DATA_DIR, exist_ok=True)
 
+
+@st.cache_resource
+def get_supabase_client():
+    try:
+        config = st.secrets.get("supabase", {})
+    except StreamlitSecretNotFoundError:
+        config = {}
+
+    url = os.environ.get("SUPABASE_URL") or config.get("url")
+    key = os.environ.get("SUPABASE_KEY") or config.get("key")
+    if not url and not key:
+        return None
+    if not url or not key:
+        raise RuntimeError("Both SUPABASE_URL and SUPABASE_KEY must be configured.")
+    return create_client(url, key)
+
+
+SUPABASE_CLIENT = get_supabase_client()
+
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 TIME_SLOTS = [
     "8:30 AM",
@@ -808,6 +830,23 @@ ensure_blocked_users_file()
 
 
 def load_user_access():
+    if SUPABASE_CLIENT:
+        rows = (
+            SUPABASE_CLIENT.table("blocked_users")
+            .select("user_id, blocked, reason, updated_by, updated_at")
+            .execute()
+            .data
+        )
+        return {
+            str(row["user_id"]): {
+                "blocked": bool(row["blocked"]),
+                "reason": row["reason"] or "",
+                "updated_by": row["updated_by"] or "",
+                "updated_at": row["updated_at"] or "",
+            }
+            for row in rows
+        }
+
     df = pd.read_csv(BLOCKED_USERS_FILE, dtype={"user_id": str})
     if df.empty:
         return {}
@@ -833,6 +872,10 @@ def save_user_access(access_records):
         }
         for user_id, details in sorted(access_records.items())
     ]
+    if SUPABASE_CLIENT:
+        if rows:
+            SUPABASE_CLIENT.table("blocked_users").upsert(rows).execute()
+        return
     pd.DataFrame(
         rows,
         columns=["user_id", "blocked", "reason", "updated_by", "updated_at"],
@@ -848,24 +891,52 @@ def set_student_blocked(roll_number, blocked, admin_id, reason=""):
     if not any(student["roll_number"] == roll_number for student in STUDENTS):
         raise ValueError(f"Unknown student roll number: {roll_number}")
 
-    access_records = load_user_access()
-    access_records[roll_number] = {
+    record = {
+        "user_id": roll_number,
         "blocked": blocked,
         "reason": reason.strip() if blocked else "",
         "updated_by": admin_id,
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
     }
-    save_user_access(access_records)
+    if SUPABASE_CLIENT:
+        SUPABASE_CLIENT.table("blocked_users").upsert(record).execute()
+    else:
+        access_records = load_user_access()
+        access_records[roll_number] = {
+            key: value for key, value in record.items() if key != "user_id"
+        }
+        save_user_access(access_records)
 
 
 def load_bookings():
+    if SUPABASE_CLIENT:
+        return (
+            SUPABASE_CLIENT.table("bookings")
+            .select(
+                "booking_id, user_type, user_id, course_code, semester, "
+                "resource_type, resource_id, booking_date, start_time, periods, "
+                "status, booking_timestamp, created_by"
+            )
+            .order("booking_timestamp", desc=True)
+            .execute()
+            .data
+        )
     df = pd.read_csv(BOOKINGS_FILE)
     if df.empty:
         return []
     return df.to_dict("records")
 
 
-def save_bookings(bookings):
+def save_booking(booking):
+    if SUPABASE_CLIENT:
+        database_booking = {
+            **booking,
+            "start_period": time_slot_index(booking["start_time"]) + 1,
+        }
+        SUPABASE_CLIENT.table("bookings").insert(database_booking).execute()
+        return
+    bookings = load_bookings()
+    bookings.append(booking)
     pd.DataFrame(bookings).to_csv(BOOKINGS_FILE, index=False)
 
 
@@ -1115,9 +1186,17 @@ def render_booking_panel(user_type, user_id, course_code, key_prefix):
             "booking_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
             "created_by": user_id,
         }
-        bookings = load_bookings()
-        bookings.append(booking_entry)
-        save_bookings(bookings)
+        try:
+            save_booking(booking_entry)
+        except APIError as error:
+            if error.code == "23P01":
+                st.error(
+                    "Conflict Error: Someone else booked this room for an "
+                    "overlapping period. Refresh availability and choose another room."
+                )
+            else:
+                st.error(f"Could not save booking to the cloud database: {error.message}")
+            return
         st.session_state.pop(query_key, None)
         st.success(f"Booking confirmed: {selected_room} on {query['booking_date']} at {query['start_time']}.")
         st.rerun()
@@ -1164,6 +1243,13 @@ def get_admin_history(course_code=None, resource_id=None, date_from=None, date_t
 
 
 st.title("Smart Room Booking")
+if SUPABASE_CLIENT:
+    st.caption("Bookings and student access are shared through the cloud database.")
+else:
+    st.warning(
+"Local CSV storage is active. Configure Supabase before deploying if "
+"bookings should be shared and persisted online."
+    )
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False

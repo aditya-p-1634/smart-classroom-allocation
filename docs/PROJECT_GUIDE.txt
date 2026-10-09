@@ -53,9 +53,10 @@ Presentation:
     Defines the blue-accented visual style, responsive layout,
     hover/focus states, and slide animations.
 
-Persistent storage:
-  CSV file (data/bookings.csv)
-    Stores booking records on the local machine.
+Storage:
+  Local runs use data/bookings.csv and data/blocked_users.csv. When
+  Supabase credentials are configured, bookings and student access are
+  stored in the shared cloud database.
 
 
 ======================================================================
@@ -67,10 +68,14 @@ hackathon\
 |-- requirements.txt       Python dependencies.
 |-- src\app.py             Main Streamlit application.
 |-- data\
-|     |-- bookings.csv and blocked_users.csv (local, ignored by Git)
+|     |-- bookings.csv and blocked_users.csv (local fallback, ignored by Git)
 |     |-- timetables\
 |           |-- Odd_Semester_Timetables_With_Rooms.pdf
 |           |-- Even_Semester_Timetables_With_Rooms.pdf
+|-- supabase\schema.sql
+|     Shared database tables and overlapping-booking constraint.
+|-- DEPLOYMENT_GUIDE.txt
+|     Steps to publish the app and configure Supabase.
 |-- docs\
 |     |-- PROJECT_GUIDE.txt
 |     |-- ROOM_AND_FACILITY_NOTES.txt
@@ -85,19 +90,19 @@ Connection overview:
        |
        +---- Login checks against demo account lists in src/app.py
        |        |
-       |        +---- Student access status read from data/blocked_users.csv
+       |        +---- Student access status read from Supabase or local CSV
        |
        +---- User selects booking constraints
        |        |
        |        +---- Room inventory in src/app.py
        |        +---- Odd/Even timetable events from data/timetables/
-       |        +---- Existing reservations read from data/bookings.csv
+       |        +---- Existing reservations read from Supabase or local CSV
        |                  |
        |                  v
        |          Available matching rooms are displayed
        |                  |
        |                  v
-       +---------- New reservation written to data/bookings.csv
+       +---------- New reservation saved to Supabase or local CSV
                           |
                           v
                  Booking history and conflict checks
@@ -380,7 +385,7 @@ records.
   - 12-hour time choices and booking-history display.
   - Microsecond-resolution booking IDs/timestamps.
   - Dark theme with blue accents and slide transitions.
-  - CSV persistence for local trial use.
+  - Local CSV storage or shared Supabase storage when configured.
 
 
 ======================================================================
@@ -393,16 +398,14 @@ The following points should be addressed before production use:
      Demo users and plain-text passwords are hard-coded in app.py.
      Replace these with a secure identity provider or a database with
      hashed passwords and role-based authorization. Student access
-     blocks are enforced for this local demo but are stored in CSV and
-     should move into the same authoritative identity store in a real
-     deployment.
+     blocks are demo-only. They use local CSV storage without Supabase or
+     the shared blocked_users table when Supabase is configured.
 
   2. Persistence and simultaneous bookings
-     CSV is suitable for a local demo, but it is not a transactional
-     database. Move to SQLite for a single-machine deployment or a
-     server database for multiple users. Add a transaction/unique
-     constraint or locking strategy to prevent simultaneous double
-     booking.
+     CSV is suitable only for local development and does not coordinate
+     multiple users. A Supabase deployment uses a PostgreSQL exclusion
+     constraint to reject overlapping confirmed bookings for the same
+     room and date. Use proper identity management before real deployment.
 
   3. Room metadata
      Verify every room's capacity, projector, room type, location, and
@@ -447,11 +450,12 @@ The following points should be addressed before production use:
 
 The main runtime is src/app.py. Streamlit turns the Python code into a
 browser-based booking interface. Timetable PDFs provide scheduled
-weekday room occupancy, room metadata provides feature constraints,
-the PDFs in data\timetables\ provide weekly schedules, and
-data\bookings.csv stores reservations. Availability combines those inputs; the booking
-form displays matching rooms, rechecks the selected room, saves the
-record, and makes it visible in the relevant history.
+weekday room occupancy, room metadata provides feature constraints, and
+the PDFs in data\timetables\ provide weekly schedules. Bookings and
+student access use Supabase when configured; otherwise, local CSV files
+are used. Availability combines those inputs; the booking form displays
+matching rooms, rechecks the selected room, saves the record, and makes
+it visible in the relevant history.
 
 The current project is suitable for local demonstration and continued
 development. It should not be treated as a secure production booking

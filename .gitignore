@@ -1,6 +1,6 @@
 .venv/
 __pycache__/
 *.py[cod]
-.streamlit/
+.streamlit/secrets.toml
 data/bookings.csv
 data/blocked_users.csv

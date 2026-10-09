@@ -1,0 +1,136 @@
+SMART ROOM BOOKING
+PUBLIC STREAMLIT DEPLOYMENT AND SHARED BOOKINGS
+
+This guide publishes the app for anyone with the link and configures
+Supabase so you and your friend use the same persistent booking data.
+
+
+1. BEFORE YOU DEPLOY
+======================================================================
+
+- Create a GitHub account if you do not have one.
+- Create a Supabase account at https://supabase.com and create a project.
+- Keep the Supabase service-role key private. It gives the app full database
+  access and must only be entered in Streamlit Cloud Secrets.
+- This demo uses public, hard-coded demo credentials. Anyone with the app
+  link can sign in, including as a demo admin, and change demo student access.
+  Do not use real student records or actual college bookings.
+
+
+2. CREATE THE SUPABASE TABLES
+======================================================================
+
+1. Open your Supabase project.
+2. Open SQL Editor and create a new query.
+3. Copy all contents of supabase\schema.sql into the query.
+4. Run the query.
+
+This creates the shared bookings and blocked_users tables. A database
+constraint also prevents overlapping confirmed bookings for the same room
+and date, including bookings submitted at nearly the same time.
+
+
+3. PUSH THE PROJECT TO GITHUB
+======================================================================
+
+From PowerShell, go to the project folder:
+
+  cd smart-classroom-allocation
+
+Create an empty repository on GitHub. Do not add a README, .gitignore, or
+license on GitHub if those files are already present in this local project.
+Replace USERNAME and REPOSITORY below with your GitHub account and repository:
+
+  git add .
+  git commit -m "Prepare Smart Room Booking for deployment"
+  git branch -M main
+  git remote add origin https://github.com/USERNAME/REPOSITORY.git
+  git push -u origin main
+
+The .gitignore excludes .venv, local CSV data, and Streamlit secrets.
+Check the files shown by "git status" before pushing. Never add a real
+secrets.toml file or the Supabase service-role key to GitHub.
+
+
+4. ADD THE DATABASE CREDENTIALS TO STREAMLIT CLOUD
+======================================================================
+
+1. In Supabase, open Project Settings > API.
+2. Copy the Project URL and the service-role key.
+3. Open https://share.streamlit.io and sign in with GitHub.
+4. Choose Create app, then select the repository and main branch.
+5. Set the app file path to:
+
+     src/app.py
+
+6. Before launching, open the app's Advanced settings / Secrets area and add:
+
+     [supabase]
+     url = "https://YOUR_PROJECT_ID.supabase.co"
+     key = "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+
+   Replace both example values with the real Supabase values. Do not put the
+   real key into README files, source code, screenshots, chat, or GitHub.
+7. Deploy the app and wait for the build to finish.
+
+Streamlit Cloud may label settings slightly differently over time. The
+important settings are the GitHub repository, branch main, app path
+src/app.py, and the two Secrets values above.
+
+
+5. SHARE IT WITH YOUR FRIEND
+======================================================================
+
+When deployment succeeds, Streamlit Cloud displays the app URL. Send that URL
+to your friend. Both of you can sign in and use the same Supabase-backed
+bookings. The persistent shared database works only after the Supabase SQL
+schema and Streamlit Secrets have both been configured.
+
+The public app currently uses sample credentials:
+
+  Student  21CS001  Password: 1234
+  Student  21CS015  Password: 1234
+  Student  21CS032  Password: 1234
+  Admin    ADM001   Password: admin123
+  Admin    ADM002   Password: admin123
+
+Anyone with the public app URL can use these accounts. This login is not
+real identity verification. Use it only for a non-sensitive demonstration.
+
+
+6. LOCAL TESTING AND STORAGE
+======================================================================
+
+Run locally without Supabase Secrets:
+
+  .\.venv\Scripts\python.exe -m streamlit run src\app.py
+
+Without Supabase credentials, the app uses local CSV files under data.
+Cloud credentials are read from Streamlit Secrets, not from a checked-in
+file. When configured, bookings and student access statuses are shared and
+stored in Supabase instead of the local CSVs.
+
+For local shared-database testing, copy
+.streamlit\secrets.toml.example to .streamlit\secrets.toml and replace the
+placeholders. The real secrets.toml is ignored by Git. Do not share it.
+
+
+7. TROUBLESHOOTING
+======================================================================
+
+Cloud build says a Python package is missing:
+  Confirm requirements.txt is in the repository and the latest commit was
+  pushed. Streamlit Cloud installs packages from that file.
+
+The app warns that local CSV storage is active:
+  Supabase Secrets are missing or have different names. Confirm that Secrets
+  contain the [supabase] section with url and key, save, then reboot the app.
+
+Bookings fail with a database/table error:
+  Confirm supabase\schema.sql ran successfully in the same Supabase project
+  whose URL and service-role key are configured in Streamlit Cloud.
+
+The deploy app cannot find timetable files:
+  Confirm both PDFs are committed under data\timetables and keep their exact
+  filenames.
+
