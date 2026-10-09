@@ -14,13 +14,13 @@ search and booking clearer.
 
 ## Short presentation
 
-“Smart Room Booking Prototype MARK-1 is a Python and Streamlit app that finds suitable rooms
-for a requested date and time. It checks the weekly Odd/Even timetable and
-previous reservations, then shows only rooms that are available and meet the
-capacity and facility needs. A final conflict check runs before a booking is
-saved. Administrators can also manage student access. This prototype uses
-local CSV storage, so it demonstrates the workflow but is not yet designed
-for simultaneous production use.”
+“Smart Room Booking Prototype MARK-1 is a Python and Streamlit app that finds
+suitable rooms for a requested date and time. It checks the weekly Odd/Even
+timetable and previous reservations, then shows only rooms that are available
+and meet the capacity and facility needs. A final conflict check runs before a
+booking is saved. Administrators can also manage student access. This
+prototype uses local CSV storage, so it demonstrates the workflow but is not
+designed for simultaneous production use.”
 
 ## Features
 

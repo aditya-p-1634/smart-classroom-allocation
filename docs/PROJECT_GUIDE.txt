@@ -334,6 +334,7 @@ src/app.py is organized into these functional areas:
 
 Open PowerShell in the project folder:
 
+  git clone https://github.com/aditya-p-1634/smart-classroom-allocation.git
   cd smart-classroom-allocation
 
 Create a virtual environment (optional if using the existing .venv):
