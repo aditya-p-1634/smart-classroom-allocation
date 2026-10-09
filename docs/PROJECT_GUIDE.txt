@@ -1,0 +1,459 @@
+SMART ROOM BOOKING
+Project Description, Technical Guide, and Structure
+
+======================================================================
+1. PROJECT OVERVIEW
+======================================================================
+
+Smart Room Booking is a local web application for finding and booking
+college classrooms, computer labs, and assembly halls. It checks room
+availability against the college's Odd and Even semester timetable PDFs
+and against reservations previously saved by users.
+
+Users specify a date, start time, number of periods, type of space,
+minimum capacity, and whether a projector is required. The app then
+shows only rooms that are both available and known to meet the selected
+requirements. A matching room can be selected and booked.
+
+The project is based on the Smart Classroom Allocation / intra-college
+room booking problem. Its main goals are:
+
+  - prevent double-booking a room;
+  - avoid timetable clashes;
+  - match room type and capacity to a booking request;
+  - account for projector requirements where room data is known;
+  - retain a booking history for students and administrators.
+
+This is currently a local demonstration/prototype, not a production
+college-wide service.
+
+
+======================================================================
+2. TECHNOLOGY AND LANGUAGES
+======================================================================
+
+Primary language:
+  Python 3
+
+Application framework:
+  Streamlit
+  Builds the browser UI from Python controls and reruns the app when a
+  user interacts with it. No separate JavaScript frontend is required.
+
+Supporting packages:
+  pandas
+    Reads and writes the booking CSV and prepares booking-history and
+    availability tables.
+  pdfplumber
+    Extracts text and page-coordinate information from the timetable
+    PDFs so the app can map rooms to days and periods.
+
+Presentation:
+  HTML and CSS embedded in src/app.py
+    Defines the blue-accented visual style, responsive layout,
+    hover/focus states, and slide animations.
+
+Persistent storage:
+  CSV file (data/bookings.csv)
+    Stores booking records on the local machine.
+
+
+======================================================================
+3. PROJECT FILES AND HOW THEY CONNECT
+======================================================================
+
+hackathon\
+|-- README.md              GitHub overview and quick start.
+|-- requirements.txt       Python dependencies.
+|-- src\app.py             Main Streamlit application.
+|-- data\
+|     |-- bookings.csv and blocked_users.csv (local, ignored by Git)
+|     |-- timetables\
+|           |-- Odd_Semester_Timetables_With_Rooms.pdf
+|           |-- Even_Semester_Timetables_With_Rooms.pdf
+|-- docs\
+|     |-- PROJECT_GUIDE.txt
+|     |-- ROOM_AND_FACILITY_NOTES.txt
+|-- .gitignore
+
+Connection overview:
+
+  Student or Admin
+       |
+       v
+  Streamlit interface in src/app.py
+       |
+       +---- Login checks against demo account lists in src/app.py
+       |        |
+       |        +---- Student access status read from data/blocked_users.csv
+       |
+       +---- User selects booking constraints
+       |        |
+       |        +---- Room inventory in src/app.py
+       |        +---- Odd/Even timetable events from data/timetables/
+       |        +---- Existing reservations read from data/bookings.csv
+       |                  |
+       |                  v
+       |          Available matching rooms are displayed
+       |                  |
+       |                  v
+       +---------- New reservation written to data/bookings.csv
+                          |
+                          v
+                 Booking history and conflict checks
+
+
+======================================================================
+4. APPLICATION WORKFLOW
+======================================================================
+
+4.1 Login
+
+The landing page displays a compact login card with:
+  - role selection: Student or Admin;
+  - Roll Number or Admin ID field, depending on the selected role;
+  - password field;
+  - Login button.
+
+Credentials are compared with sample records defined in app.py. A valid
+login stores the user's role and ID in Streamlit session state and
+displays the corresponding dashboard. Invalid credentials display an
+error.
+
+Sample demonstration accounts:
+  Student: 21CS001 / 1234
+  Student: 21CS015 / 1234
+  Student: 21CS032 / 1234
+  Admin:   ADM001 / admin123
+  Admin:   ADM002 / admin123
+
+These credentials are for local demonstration only. They are not secure
+production credentials.
+
+4.2 Student dashboard
+
+The student dashboard identifies the logged-in sample student and shows
+two main areas:
+  - Find a room: enter booking details, view matching availability, and
+    confirm a reservation.
+  - Booking History: see reservations associated with that student's
+    roll number.
+
+Students do not select a subject in the current UI. Student reservations
+are saved with the course code "General".
+
+4.3 Admin dashboard
+
+The admin dashboard provides:
+  - Book space: choose a course code, set booking constraints, and book
+    a matching room.
+  - Booking history: view all matching reservations with optional
+    filters for course, room, and date range.
+  - Manage student access: block or unblock a student account and
+    optionally enter a reason for the block.
+
+Unlike the student history, admin history is intended for
+administrative reporting and includes bookings by both students and
+admins.
+
+Administrators can manage student accounts only; this prototype does
+not allow admins to block other admin accounts. A block prevents that
+student from logging in. An already active student session is closed
+when the app next processes an interaction/rerun. The access table shows
+the current status, reason, admin ID, and most recent update time.
+
+4.4 Availability search
+
+The booking form asks for:
+  - Semester timetable: Odd or Even;
+  - Room type: Classroom, Lab, Hall, or All;
+  - Date;
+  - Start time in 12-hour format;
+  - Number of periods;
+  - Minimum capacity;
+  - Projector required: yes/no.
+
+After "Show all room availability" is selected, the app:
+  1. Gets rooms from the room catalog.
+  2. Checks requested periods against scheduled timetable use for that
+     weekday and semester.
+  3. Checks saved bookings for overlaps on the requested date.
+  4. Checks capacity and projector requirements.
+  5. Displays only rooms that are available and meet the requested
+     features.
+  6. Offers the matching room IDs for selection and confirmation.
+
+Rooms with unknown capacity or projector details are not considered a
+match when those facts are necessary to verify the request. The app
+does not guess missing values.
+
+4.5 Booking confirmation
+
+Before saving, the app checks availability again to catch a room that
+became booked after the results were displayed. If a conflict is found,
+the user is asked to refresh the availability results and select a
+different room.
+
+The saved record contains:
+  - booking ID;
+  - user role and user ID;
+  - course code;
+  - semester;
+  - resource type and room ID;
+  - booking date;
+  - start time;
+  - number of periods;
+  - status;
+  - booking timestamp with microseconds;
+  - creator ID.
+
+
+======================================================================
+5. AVAILABILITY AND CONFLICT RULES
+======================================================================
+
+The timetable PDFs provide a weekday timetable, not a calendar of
+specific dates. For a requested Monday-Friday date, the app selects the
+matching weekday from the chosen Odd or Even timetable.
+
+The timetable extractor uses pdfplumber to locate:
+  - the P1-P8 column positions;
+  - weekday row positions;
+  - room labels in each timetable cell.
+
+Room labels that fall between two period columns are treated as a
+double-period activity, consistent with lab entries in the timetable.
+Extracted events are cached for the Streamlit process.
+
+Time choices correspond to the timetable periods:
+  P1  8:30 AM - 9:20 AM
+  P2  9:20 AM - 10:10 AM
+  P3  10:30 AM - 11:20 AM
+  P4  11:20 AM - 12:10 PM
+  P5  1:40 PM - 2:30 PM
+  P6  2:30 PM - 3:20 PM
+  P7  3:30 PM - 4:20 PM
+  P8  4:20 PM - 5:10 PM
+
+Conflict checks compare period-number ranges for the same room and
+date. Any shared period means a conflict. Existing saved booking times
+in the earlier 24-hour format are also supported and displayed in
+12-hour format.
+
+Important distinction:
+  - The booking timestamp is recorded to microsecond precision.
+  - Availability is enforced by checking overlapping periods, not by
+    comparing timestamps to resolve simultaneous requests.
+  - CSV storage does not provide database transactions or reliable
+    concurrency control for multiple people booking at the same time.
+
+Saturday and Sunday are not present in the provided weekly timetables.
+The app therefore cannot use the PDFs to detect weekend classes; only
+saved bookings are checked on those dates.
+
+
+======================================================================
+6. ROOM AND SOURCE DATA
+======================================================================
+
+Room details are currently assembled from the code and the provided
+documents:
+  - CLASSROOMS lists known classroom capacities, projector availability,
+    and building IDs.
+  - LABS lists known labs and their current configured facilities.
+  - HALLS lists the 30 hall IDs supplied in the weekday hall notes, with
+    stated capacity and projector availability.
+  - room_catalog() combines configured room details with any additional
+    room IDs discovered in the timetable PDFs.
+  - load_timetable_data() reads the Odd and Even semester PDF files.
+
+The PDF and source notes do not provide verified capacity or projector
+details for every timetable room. Those details should be reviewed and
+completed by an administrator before relying on feature matching for
+real bookings.
+
+The timetable PDFs must remain in data/timetables with their current
+filenames. If a PDF is moved, renamed, or replaced with a differently
+formatted document, timetable extraction may fail or need adjustment.
+
+
+======================================================================
+7. CODE MAP
+======================================================================
+
+src/app.py is organized into these functional areas:
+
+  A. Streamlit configuration and CSS
+     Sets the browser title, wide layout, blue accents, and
+     responsive styling.
+
+  B. Paths and constants
+     Defines project-relative paths, CSV and timetable locations,
+     weekday/time periods, sample users, course codes, and room catalogs.
+
+  C. load_timetable_data()
+     Opens both timetable PDFs, extracts room/day/period events, and
+     discovers lab room IDs. Cached to avoid parsing PDFs on each UI
+     rerun.
+
+  D. Booking persistence
+     ensure_bookings_file() creates the CSV with expected columns.
+     load_bookings() reads records.
+     save_bookings() writes records.
+
+  E. Room inventory
+     room_choices() and room_catalog() combine configured and
+     timetable-discovered room IDs.
+
+  F. Conflict and time helpers
+     time_slot_index() normalizes current 12-hour and legacy 24-hour
+     time labels.
+     is_room_conflict() checks timetable occupancy and saved bookings.
+     booking_history_frame() formats booking rows for display.
+
+  G. Availability matching
+     get_room_availability() calculates conflict state and verifies
+     room type, capacity, and projector constraints.
+
+  H. Booking interaction
+     render_booking_panel() renders the form, results table, matching
+     room selection, final conflict re-check, and CSV save.
+
+  I. Identity and history helpers
+     get_student_by_roll(), get_admin_by_id(), get_booking_history(),
+     and get_admin_history() support login and history views.
+
+  J. Main screen and dashboards
+     Renders login, student booking/history, and admin booking/history.
+
+
+======================================================================
+8. INSTALL AND RUN LOCALLY (WINDOWS POWERSHELL)
+======================================================================
+
+Open PowerShell in the project folder:
+
+  cd smart-classroom-allocation
+
+Create a virtual environment (optional if using the existing .venv):
+
+  py -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+
+Install the project packages:
+
+  python -m pip install -r requirements.txt
+
+Start the local app:
+
+  python -m streamlit run src\app.py
+
+Open this address in a browser:
+
+  http://localhost:8501
+
+Stop the server with Ctrl+C in the terminal running Streamlit.
+
+The app creates data\bookings.csv automatically when it starts if the
+file does not exist. Keep data\bookings.csv if booking history should
+persist between runs. Back it up before manually editing or removing
+records.
+
+
+======================================================================
+9. CURRENT FEATURES
+======================================================================
+
+  - Student and admin role selection and demo login.
+  - Admin blocking and unblocking of student accounts, persisted in
+    data\blocked_users.csv.
+  - Student-specific reservation history.
+  - Admin booking for a selected course code.
+  - Admin history covering student and admin records.
+  - History filters for course, room, and date range.
+  - Search for classroom, lab, hall, or any room type.
+  - Capacity and optional projector matching.
+  - Odd/Even timetable conflict checks for weekdays.
+  - Saved-booking overlap detection.
+  - Availability result list contains only rooms that are free and meet
+    the requested features.
+  - 12-hour time choices and booking-history display.
+  - Microsecond-resolution booking IDs/timestamps.
+  - Dark theme with blue accents and slide transitions.
+  - CSV persistence for local trial use.
+
+
+======================================================================
+10. LIMITATIONS AND NEXT STEPS
+======================================================================
+
+The following points should be addressed before production use:
+
+  1. Authentication
+     Demo users and plain-text passwords are hard-coded in app.py.
+     Replace these with a secure identity provider or a database with
+     hashed passwords and role-based authorization. Student access
+     blocks are enforced for this local demo but are stored in CSV and
+     should move into the same authoritative identity store in a real
+     deployment.
+
+  2. Persistence and simultaneous bookings
+     CSV is suitable for a local demo, but it is not a transactional
+     database. Move to SQLite for a single-machine deployment or a
+     server database for multiple users. Add a transaction/unique
+     constraint or locking strategy to prevent simultaneous double
+     booking.
+
+  3. Room metadata
+     Verify every room's capacity, projector, room type, location, and
+     accessibility facilities. Avoid treating estimated values as
+     official information.
+
+  4. Timetable parsing
+     PDF extraction relies on the present document layout and column
+     positions. Validate extracted events whenever timetable PDFs
+     change. A structured timetable CSV or database would be more robust.
+
+  5. Calendar and time behavior
+     The timetable is weekly and only covers weekdays. Define policies
+     for weekends, holidays, timetable weeks, term dates, and
+     cancellations. The listed periods include breaks between some
+     periods; multi-period booking rules should be confirmed against
+     institutional policy.
+
+  6. User and course data
+     Student records and course codes are sample data in app.py.
+     Connect the app to the official student/course registry before
+     using real identities.
+
+  7. Booking management
+     Add cancellation/edit flows, notifications, audit logging, and
+     clearer booking status management if needed.
+
+  8. Automated tests
+     Add tests for timetable extraction, capacity/projector filters,
+     period overlaps, weekday mapping, old time-format migration,
+     login roles, and simultaneous booking behavior.
+
+  9. Privacy and deployment
+     Protect booking history and credentials, configure network access,
+     use HTTPS for remote use, and establish backups and retention
+     rules.
+
+
+======================================================================
+11. PROJECT SUMMARY
+======================================================================
+
+The main runtime is src/app.py. Streamlit turns the Python code into a
+browser-based booking interface. Timetable PDFs provide scheduled
+weekday room occupancy, room metadata provides feature constraints,
+the PDFs in data\timetables\ provide weekly schedules, and
+data\bookings.csv stores reservations. Availability combines those inputs; the booking
+form displays matching rooms, rechecks the selected room, saves the
+record, and makes it visible in the relevant history.
+
+The current project is suitable for local demonstration and continued
+development. It should not be treated as a secure production booking
+service until the authentication, data, timetable validation, and
+concurrent booking limitations above are addressed.

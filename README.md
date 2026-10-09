@@ -1,0 +1,108 @@
+# Smart Room Booking
+
+A Streamlit app that helps students and administrators find and book available
+classrooms, labs, and halls. It checks the selected time against the weekly
+Odd/Even semester timetables and existing bookings, then lists only rooms that
+match the requested type, capacity, and projector requirements.
+
+## Why this project
+
+Manual room allocation can lead to double bookings, overcrowded rooms, or
+spaces without required facilities. This project demonstrates how timetable
+data, room requirements, and saved reservations can be combined to make room
+search and booking clearer.
+
+## Short presentation
+
+“Smart Room Booking is a Python and Streamlit app that finds suitable rooms
+for a requested date and time. It checks the weekly Odd/Even timetable and
+previous reservations, then shows only rooms that are available and meet the
+capacity and facility needs. A final conflict check runs before a booking is
+saved. Administrators can also manage student access. This prototype uses
+local CSV storage, so it demonstrates the workflow but is not yet designed
+for simultaneous production use.”
+
+## Features
+
+- Search for currently available classrooms, labs, and halls.
+- Filter by semester timetable, date, time, duration, capacity, and projector.
+- Avoid conflicts with scheduled classes and saved reservations.
+- Student and administrator booking histories.
+- Admin tools to block or unblock student accounts.
+- Save bookings and student access status locally as CSV files.
+- Blue-accented interface with 12-hour time labels.
+
+## Run locally
+
+Requirements: Python 3.10+ and Windows PowerShell (other platforms can use
+their equivalent virtual-environment activation command).
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m streamlit run src\app.py
+```
+
+Open <http://localhost:8501>. The app creates the local CSV files under `data`
+when it runs. They are intentionally excluded from Git so personal or
+machine-specific booking records are not pushed to GitHub.
+
+## Demo accounts
+
+These built-in accounts are for demonstration only—not real credentials:
+
+| Role | ID | Password |
+|---|---|---|
+| Student | `21CS001` | `1234` |
+| Student | `21CS015` | `1234` |
+| Student | `21CS032` | `1234` |
+| Admin | `ADM001` | `admin123` |
+| Admin | `ADM002` | `admin123` |
+
+## How it works
+
+1. The user signs in as a student or admin.
+2. The user selects a date, start time, number of periods, room type, and
+   optional capacity/projector requirements.
+3. The app parses the matching weekday from the Odd or Even timetable PDF and
+   checks saved reservations for overlapping periods.
+4. It lists rooms that are both free and suitable.
+5. When a room is booked, availability is checked again before the booking is
+   saved.
+
+## Project structure
+
+```text
+.
+├── src/
+│   └── app.py
+├── data/
+│   └── timetables/
+│       ├── Odd_Semester_Timetables_With_Rooms.pdf
+│       └── Even_Semester_Timetables_With_Rooms.pdf
+├── docs/
+│   ├── PROJECT_GUIDE.txt
+│   └── ROOM_AND_FACILITY_NOTES.txt
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+
+## Technology
+
+- Python
+- Streamlit for the web interface
+- pandas for CSV-backed booking data
+- pdfplumber for extracting timetable information from PDFs
+
+## Current limitations
+
+- Demo users and passwords are stored in the source code.
+- CSV storage is suitable for a local demonstration, not concurrent production
+  use.
+- Timetable parsing depends on the supplied PDF layout.
+- Room capacity and facility details should be verified before real use.
+
+See [docs/PROJECT_GUIDE.txt](docs/PROJECT_GUIDE.txt) for detailed behavior,
+architecture, and setup notes.

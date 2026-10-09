@@ -1,0 +1,178 @@
+📅 Monday
+Odd Sem (8 empty rooms):
+
+40 seats: M502* (with projector), J501* (with projector), K505* (no projector)
+
+60 seats: A110* (with projector), M507* (with projector), A112* (no projector)
+
+80 seats: J514* (with projector), K503* (no projector)
+
+Even Sem (8 empty rooms):
+
+40 seats: M501* (with projector), J502* (with projector), K504* (no projector)
+
+60 seats: A106* (with projector), M505* (with projector), J517* (no projector)
+
+80 seats: A109* (with projector), M506* (no projector)
+
+📅 Tuesday
+Odd Sem:
+
+40 seats: M501* (with projector), J514* (with projector), K503* (no projector)
+
+60 seats: A106* (with projector), M506* (with projector), J502* (no projector)
+
+80 seats: A109* (with projector), K505* (no projector)
+
+Even Sem:
+
+40 seats: M502* (with projector), J518* (with projector), K501* (no projector)
+
+60 seats: A107 (with projector), M507* (with projector), J501* (no projector)
+
+80 seats: A110* (with projector), K503* (no projector)
+
+📅 Wednesday
+Odd Sem:
+
+40 seats: M505* (with projector), J517* (with projector), K504* (no projector)
+
+60 seats: A109* (with projector), M507* (with projector), A315 (no projector)
+
+80 seats: J501* (with projector), A106* (no projector)
+
+Even Sem:
+
+40 seats: M501* (with projector), J514* (with projector), K505* (no projector)
+
+60 seats: A108* (with projector), M502* (with projector), J518* (no projector)
+
+80 seats: A111 (with projector), K503* (no projector)
+
+📅 Thursday
+Odd Sem:
+
+40 seats: M501* (with projector), J518* (with projector), K505* (no projector)
+
+60 seats: A108* (with projector), M502* (with projector), J514* (no projector)
+
+80 seats: A110* (with projector), K503* (no projector)
+
+Even Sem:
+
+40 seats: M506* (with projector), J501* (with projector), K504* (no projector)
+
+60 seats: A107 (with projector), M507* (with projector), J517* (no projector)
+
+80 seats: A109* (with projector), A315 (no projector)
+
+📅 Friday
+Odd Sem:
+
+40 seats: M506* (with projector), J501* (with projector), K503* (no projector)
+
+60 seats: A107 (with projector), M505* (with projector), A110* (no projector)
+
+80 seats: J517* (with projector), K504* (no projector)
+
+Even Sem:
+
+40 seats: M501* (with projector), J502* (with projector), K505* (no projector)
+
+60 seats: A106* (with projector), M507* (with projector), J518* (no projector)
+
+80 seats: A111 (with projector), A112* (no projector)
+
+
+
+
+📅 Monday
+Odd Sem:
+
+Lab with projector: Math Foundations Lab M601
+
+Lab without projector: Physics/Electronics Lab K601
+
+Even Sem:
+
+Lab with projector: Object Computing Lab M601
+
+Lab without projector: DS Lab J601
+
+📅 Tuesday
+Odd Sem:
+
+Lab with projector: C Lab J601
+
+Lab without projector: Economic Analysis Lab M601
+
+Even Sem:
+
+Lab with projector: DS Lab M601
+
+Lab without projector: OOP Lab K601
+
+📅 Wednesday
+Odd Sem:
+
+Lab with projector: Algorithms Lab J701
+
+Lab without projector: Scientific Computing Lab K701
+
+Even Sem:
+
+Lab with projector: Python Lab A601
+
+Lab without projector: DS Lab M602
+
+📅 Thursday
+Odd Sem:
+
+Lab with projector: R Lab M701
+
+Lab without projector: Math Lab A601
+
+Even Sem:
+
+Lab with projector: OS Lab M701
+
+Lab without projector: Java Lab M702
+
+📅 Friday
+Odd Sem:
+
+Lab with projector: ML Lab J801
+
+Lab without projector: Networks Lab M801
+
+Even Sem:
+
+Lab with projector: Big Data Lab M801
+
+Lab without projector: Compiler Lab K801
+
+
+📅 Monday
+Odd Sem: Hall A150 (capacity 150, projector), Hall B200 (capacity 200, projector), Hall C250 (capacity 250, projector)
+
+Even Sem: Hall D150 (capacity 150, projector), Hall E200 (capacity 200, projector), Hall F250 (capacity 250, projector)
+
+📅 Tuesday
+Odd Sem: Hall G150 (capacity 150, projector), Hall H200 (capacity 200, projector), Hall I250 (capacity 250, projector)
+
+Even Sem: Hall J150 (capacity 150, projector), Hall K200 (capacity 200, projector), Hall L250 (capacity 250, projector)
+
+📅 Wednesday
+Odd Sem: Hall M150 (capacity 150, projector), Hall N200 (capacity 200, projector), Hall O250 (capacity 250, projector)
+
+Even Sem: Hall P150 (capacity 150, projector), Hall Q200 (capacity 200, projector), Hall R250 (capacity 250, projector)
+
+📅 Thursday
+Odd Sem: Hall S150 (capacity 150, projector), Hall T200 (capacity 200, projector), Hall U250 (capacity 250, projector)
+
+Even Sem: Hall V150 (capacity 150, projector), Hall W200 (capacity 200, projector), Hall X250 (capacity 250, projector)
+
+📅 Friday
+Odd Sem: Hall Y150 (capacity 150, projector), Hall Z200 (capacity 200, projector), Hall AA250 (capacity 250, projector)
+
+Even Sem: Hall AB150 (capacity 150, projector), Hall AC200 (capacity 200, projector), Hall AD250 (capacity 250, projector)
