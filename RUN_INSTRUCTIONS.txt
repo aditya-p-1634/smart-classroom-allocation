@@ -1,4 +1,4 @@
-SMART ROOM BOOKING
+SMART ROOM BOOKING — PROTOTYPE MARK-1
 HOW TO INSTALL, RUN, AND USE THE APPLICATION
 
 ======================================================================
@@ -145,4 +145,3 @@ Port 8501 is already in use:
   Stop the other Streamlit process, or start this app on another port:
     .\.venv\Scripts\python.exe -m streamlit run src\app.py --server.port 8502
   Then open http://localhost:8502.
-

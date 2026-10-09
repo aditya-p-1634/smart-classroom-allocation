@@ -1,4 +1,4 @@
-# Smart Room Booking
+# Smart Room Booking — Prototype MARK-1
 
 A Streamlit app that helps students and administrators find and book available
 classrooms, labs, and halls. It checks the selected time against the weekly
@@ -14,7 +14,7 @@ search and booking clearer.
 
 ## Short presentation
 
-“Smart Room Booking is a Python and Streamlit app that finds suitable rooms
+“Smart Room Booking Prototype MARK-1 is a Python and Streamlit app that finds suitable rooms
 for a requested date and time. It checks the weekly Odd/Even timetable and
 previous reservations, then shows only rooms that are available and meet the
 capacity and facility needs. A final conflict check runs before a booking is
@@ -34,8 +34,7 @@ for simultaneous production use.”
 
 ## Run locally
 
-Requirements: Python 3.10+ and Windows PowerShell (other platforms can use
-their equivalent virtual-environment activation command).
+Requirements: Python 3.10+ and Windows PowerShell.
 
 ```powershell
 py -m venv .venv
@@ -48,17 +47,8 @@ Open <http://localhost:8501>. The app creates the local CSV files under `data`
 when it runs. They are intentionally excluded from Git so personal or
 machine-specific booking records are not pushed to GitHub.
 
-## Deploy for shared access
-
-For an internet-accessible version with persistent shared bookings, follow
-[DEPLOYMENT_GUIDE.txt](DEPLOYMENT_GUIDE.txt). It uses Streamlit Community
-Cloud and Supabase. Configure the Supabase credentials in Streamlit Cloud
-Secrets; never commit the service-role key.
-
-**Public demo warning:** anyone with the public app link can use the built-in
-demo accounts. Their credentials are included below and in the source, so an
-admin demo login allows blocking/unblocking students. This prototype is for
-demonstration, not real personal or college booking data.
+See [RUN_INSTRUCTIONS.txt](RUN_INSTRUCTIONS.txt) for complete installation,
+usage, and troubleshooting steps.
 
 ## Demo accounts
 
@@ -96,20 +86,18 @@ These built-in accounts are for demonstration only—not real credentials:
 ├── docs/
 │   ├── PROJECT_GUIDE.txt
 │   └── ROOM_AND_FACILITY_NOTES.txt
-├── supabase/
-│   └── schema.sql
 ├── requirements.txt
 ├── .gitignore
-└── README.md
+├── README.md
+└── RUN_INSTRUCTIONS.txt
 ```
 
 ## Technology
 
 - Python
 - Streamlit for the web interface
-- pandas for local CSV-backed booking data
+- pandas for CSV-backed booking data
 - pdfplumber for extracting timetable information from PDFs
-- Supabase for shared cloud storage
 
 ## Current limitations
 
