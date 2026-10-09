@@ -17,11 +17,17 @@ install the required packages from requirements.txt.
 2. OPEN THE PROJECT
 ======================================================================
 
-Open PowerShell and change to the project folder. For example:
+First, install Git if it is not already installed. Open PowerShell and clone
+the project from GitHub:
 
+  git clone https://github.com/aditya-p-1634/smart-classroom-allocation.git
   cd smart-classroom-allocation
 
-Run the remaining commands from this folder. It should contain:
+Alternatively, on the GitHub repository page choose Code > Download ZIP,
+extract the ZIP, then use PowerShell to change into the extracted project
+folder before continuing.
+
+Run the remaining commands from the project root. It should contain:
 
   src\app.py
   requirements.txt
@@ -41,9 +47,10 @@ Install the required packages into that environment:
 
   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
-These commands do not require activating the virtual environment. If the
-project's .venv folder already exists, skip the creation command and install
-packages if needed.
+These commands do not require activating the virtual environment. The
+environment is created on each person's own computer and is not downloaded
+from GitHub. If the project's .venv folder already exists locally, skip the
+creation command and install packages if needed.
 
 
 ======================================================================

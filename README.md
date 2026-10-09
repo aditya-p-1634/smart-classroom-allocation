@@ -34,18 +34,21 @@ for simultaneous production use.”
 
 ## Run locally
 
-Requirements: Python 3.10+ and Windows PowerShell.
+Requirements: Git, Python 3.10+, and Windows PowerShell.
 
 ```powershell
+git clone https://github.com/aditya-p-1634/smart-classroom-allocation.git
+cd smart-classroom-allocation
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 python -m streamlit run src\app.py
 ```
 
-Open <http://localhost:8501>. The app creates the local CSV files under `data`
-when it runs. They are intentionally excluded from Git so personal or
-machine-specific booking records are not pushed to GitHub.
+Open <http://localhost:8501>. Alternatively, download the repository as a ZIP
+from GitHub, extract it, and run the commands from its folder. Each person
+creates their own local `.venv` and booking CSV files; these are not included
+in the repository.
 
 See [RUN_INSTRUCTIONS.txt](RUN_INSTRUCTIONS.txt) for complete installation,
 usage, and troubleshooting steps.
