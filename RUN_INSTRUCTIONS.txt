@@ -1,0 +1,148 @@
+SMART ROOM BOOKING
+HOW TO INSTALL, RUN, AND USE THE APPLICATION
+
+======================================================================
+1. REQUIREMENTS
+======================================================================
+
+- Windows 10 or later
+- Python 3.10 or later
+- Internet access the first time you install the Python packages
+
+The project uses Streamlit, pandas, and pdfplumber. The commands below
+install the required packages from requirements.txt.
+
+
+======================================================================
+2. OPEN THE PROJECT
+======================================================================
+
+Open PowerShell and change to the project folder. For example:
+
+  cd smart-classroom-allocation
+
+Run the remaining commands from this folder. It should contain:
+
+  src\app.py
+  requirements.txt
+  data\timetables\Odd_Semester_Timetables_With_Rooms.pdf
+  data\timetables\Even_Semester_Timetables_With_Rooms.pdf
+
+
+======================================================================
+3. FIRST-TIME SETUP
+======================================================================
+
+Create a local Python virtual environment:
+
+  py -m venv .venv
+
+Install the required packages into that environment:
+
+  .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+These commands do not require activating the virtual environment. If the
+project's .venv folder already exists, skip the creation command and install
+packages if needed.
+
+
+======================================================================
+4. START THE APPLICATION
+======================================================================
+
+From the project folder, run:
+
+  .\.venv\Scripts\python.exe -m streamlit run src\app.py
+
+Wait for Streamlit to start, then open this address in a browser:
+
+  http://localhost:8501
+
+Leave the PowerShell window open while using the application. To stop the
+server, focus that window and press Ctrl+C.
+
+
+======================================================================
+5. DEMONSTRATION ACCOUNTS
+======================================================================
+
+These are sample accounts built into the demonstration app:
+
+  Student  21CS001  Password: 1234
+  Student  21CS015  Password: 1234
+  Student  21CS032  Password: 1234
+  Admin    ADM001   Password: admin123
+  Admin    ADM002   Password: admin123
+
+These are demonstration credentials, not secure real-world accounts.
+
+
+======================================================================
+6. HOW TO USE THE APP
+======================================================================
+
+Student:
+  1. Choose Student on the sign-in page.
+  2. Enter a student roll number and password from the sample account list.
+  3. Select a date, semester timetable, room type, start time, number of
+     periods, minimum capacity, and whether a projector is required.
+  4. Choose Show all room availability. The results contain rooms that are
+     both free for the selected time and suitable for the requirements.
+  5. Select an available room and confirm the booking.
+  6. Open Booking history to view that student's reservations.
+
+Administrator:
+  1. Choose Admin and sign in with an admin ID and password.
+  2. Use Book space to search for and make a booking.
+  3. Use Booking history to review reservations.
+  4. Use Manage student access to block or unblock a student. A blocked
+     student cannot sign in; an active session ends on its next interaction.
+
+
+======================================================================
+7. PROJECT DATA AND FILES
+======================================================================
+
+  src\app.py
+    Streamlit interface and application logic.
+
+  data\timetables\
+    Odd and Even semester timetable PDFs used for weekday conflict checks.
+    Keep both PDFs in this folder with their current filenames.
+
+  data\bookings.csv
+    Local reservation history. Created by the application if it is missing.
+
+  data\blocked_users.csv
+    Local student block status and its audit information. Created by the
+    application if it is missing.
+
+  docs\PROJECT_GUIDE.txt
+    Detailed project description, design, and limitations.
+
+The CSV files are local application data and are excluded from Git. Back
+them up if you need to preserve local booking history when moving or
+reinstalling the project.
+
+
+======================================================================
+8. TROUBLESHOOTING
+======================================================================
+
+"py" is not recognized:
+  Install Python 3.10 or later and enable the Python Launcher during setup.
+  Reopen PowerShell after installing.
+
+"No module named streamlit" or another missing package:
+  From the project folder, run:
+    .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+The app cannot find a timetable PDF:
+  Confirm both timetable PDFs are in data\timetables and their filenames
+  match the names listed in section 2.
+
+Port 8501 is already in use:
+  Stop the other Streamlit process, or start this app on another port:
+    .\.venv\Scripts\python.exe -m streamlit run src\app.py --server.port 8502
+  Then open http://localhost:8502.
+
