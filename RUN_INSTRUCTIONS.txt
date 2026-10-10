@@ -91,12 +91,16 @@ These are demonstration credentials, not secure real-world accounts.
 Student:
   1. Choose Student on the sign-in page.
   2. Enter a student roll number and password from the sample account list.
-  3. Select a date, semester timetable, room type, start time, number of
-     periods, minimum capacity, and whether a projector is required.
-  4. Choose Show all room availability. The results contain rooms that are
+  3. Open Today's timetable, select an Odd or Even timetable, and choose a
+     program. The displayed day is based on this computer's local system date.
+     The PDFs contain multiple programs and are not linked to individual
+     student accounts.
+  4. To book a room, select a date, semester timetable, room type, start time,
+     number of periods, minimum capacity, and whether a projector is required.
+  5. Choose Show all room availability. The results contain rooms that are
      both free for the selected time and suitable for the requirements.
-  5. Select an available room and confirm the booking.
-  6. Open Booking history to view that student's reservations.
+  6. Select an available room and confirm the booking.
+  7. Open Booking history to view that student's reservations.
 
 Administrator:
   1. Choose Admin and sign in with an admin ID and password.
@@ -114,8 +118,9 @@ Administrator:
     Streamlit interface and application logic.
 
   data\timetables\
-    Odd and Even semester timetable PDFs used for weekday conflict checks.
-    Keep both PDFs in this folder with their current filenames.
+    Odd and Even semester timetable PDFs used for weekday conflict checks
+    and the student Today's timetable view. Keep both PDFs in this folder
+    with their current filenames.
 
   data\bookings.csv
     Local reservation history. Created by the application if it is missing.

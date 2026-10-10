@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import datetime
+from datetime import date, datetime
 
 import pandas as pd
 import pdfplumber
@@ -684,6 +684,7 @@ ROOM_OPTIONS = {"Classroom": CLASSROOMS, "Lab": LABS, "Hall": HALLS}
 @st.cache_data
 def load_timetable_data():
     timetable_events = []
+    daily_schedule = []
     lab_room_ids = set()
 
     for semester in ("Odd", "Even"):
@@ -696,6 +697,7 @@ def load_timetable_data():
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
                 text = page.extract_text() or ""
+                program = text.splitlines()[0] if text.splitlines() else "Program not identified"
                 lab_match = re.search(r"Lab room:\s*([A-Z]\d{3})", text)
                 if lab_match:
                     lab_room_ids.add(lab_match.group(1))
@@ -721,6 +723,7 @@ def load_timetable_data():
                     ((period_centers[first] + period_centers[first + 1]) / 2, first)
                     for first in range(1, 8)
                 ]
+                period_width = period_centers[2] - period_centers[1]
                 for word in words:
                     room_match = re.fullmatch(r"([A-Z]\d{3})\*?", word["text"])
                     if not room_match:
@@ -749,6 +752,41 @@ def load_timetable_data():
                     else:
                         occupied_periods = (nearest_period,)
 
+                    first_occupied = occupied_periods[0]
+                    last_occupied = occupied_periods[-1]
+                    cell_left = period_centers[first_occupied] - period_width / 2
+                    cell_right = period_centers[last_occupied] + period_width / 2
+                    subject_words = [
+                        cell_word
+                        for cell_word in words
+                        if cell_left
+                        <= (cell_word["x0"] + cell_word["x1"]) / 2
+                        <= cell_right
+                        and abs(
+                            (cell_word["top"] + cell_word["bottom"]) / 2 - day_y
+                        ) <= 30
+                        and not re.fullmatch(r"[A-Z]\d{3}\*?", cell_word["text"])
+                        and cell_word["text"] not in DAY_ABBREVIATIONS
+                    ]
+                    subject = " ".join(
+                        cell_word["text"]
+                        for cell_word in sorted(
+                            subject_words,
+                            key=lambda item: (item["top"], item["x0"]),
+                        )
+                    ).strip()
+                    daily_schedule.append(
+                        {
+                            "semester": semester,
+                            "program": program,
+                            "day": day,
+                            "period_start": first_occupied,
+                            "period_end": last_occupied,
+                            "subject": subject,
+                            "room_id": room_match.group(1),
+                        }
+                    )
+
                     for period in occupied_periods:
                         timetable_events.append(
                             {
@@ -761,10 +799,10 @@ def load_timetable_data():
 
     if not timetable_events:
         raise ValueError("No class room assignments could be read from the timetable PDFs.")
-    return timetable_events, sorted(lab_room_ids)
+    return timetable_events, sorted(lab_room_ids), daily_schedule
 
 
-TIMETABLE_EVENTS, TIMETABLE_LAB_IDS = load_timetable_data()
+TIMETABLE_EVENTS, TIMETABLE_LAB_IDS, TIMETABLE_SCHEDULE = load_timetable_data()
 
 
 def ensure_bookings_file():
@@ -963,6 +1001,20 @@ def booking_history_frame(bookings):
         history["course"] = history["course_code"].map(COURSE_CODES).fillna(history["course_code"])
         history = history.drop(columns=["start_time"])
     return history
+
+
+def get_daily_timetable(semester, selected_date, program=None):
+    day = DAYS[selected_date.weekday()] if selected_date.weekday() < len(DAYS) else None
+    if day is None:
+        return []
+
+    return [
+        event
+        for event in TIMETABLE_SCHEDULE
+        if event["semester"] == semester
+        and event["day"] == day
+        and (program is None or event["program"] == program)
+    ]
 
 
 def get_room_availability(semester, booking_date, start_time, periods, resource_type, capacity, requires_projector):
@@ -1233,18 +1285,94 @@ else:
         history = get_booking_history("Student", student["roll_number"])
         st.subheader(f"{student['name']} · {student['roll_number']}")
 
-        col1, col2 = st.columns([1, 1])
-        with col1:
+        booking_tab, timetable_tab, history_tab = st.tabs(
+            ["Book space", "Today's timetable", "Booking history"]
+        )
+        with booking_tab:
             render_booking_panel(
                 user_type="Student",
                 user_id=student["roll_number"],
                 course_code="General",
                 key_prefix="student",
             )
-        with col2:
+
+        with timetable_tab:
+            today = date.today()
+            st.subheader(f"Today's timetable · {today.strftime('%A, %d %B %Y')}")
+            st.caption(
+                "The date is taken from this computer's local system clock. "
+                "Select the semester timetable and program to view."
+            )
+            semester = st.selectbox(
+                "Semester timetable",
+                ["Odd", "Even"],
+                key="student_timetable_semester",
+            )
+            programs = sorted(
+                {
+                    event["program"]
+                    for event in TIMETABLE_SCHEDULE
+                    if event["semester"] == semester
+                }
+            )
+            selected_program = st.selectbox(
+                "Program",
+                ["All programs"] + programs,
+                key=f"student_timetable_program_{semester.lower()}",
+            )
+            day_schedule = get_daily_timetable(
+                semester,
+                today,
+                program=None if selected_program == "All programs" else selected_program,
+            )
+            if today.weekday() >= len(DAYS):
+                st.info("The provided timetable PDFs do not include weekend classes.")
+            elif not day_schedule:
+                st.info("No scheduled classes were found for this day and selection.")
+            else:
+                timetable_rows = []
+                for event in day_schedule:
+                    first_period = event["period_start"]
+                    last_period = event["period_end"]
+                    period_label = (
+                        f"P{first_period}"
+                        if first_period == last_period
+                        else f"P{first_period}-P{last_period}"
+                    )
+                    timetable_rows.append(
+                        {
+                            "Program": event["program"],
+                            "_period_start": first_period,
+                            "Period": period_label,
+                            "Time": (
+                                f"{TIME_SLOTS[first_period - 1]} - "
+                                f"{PERIOD_END_TIMES[last_period - 1]}"
+                            ),
+                            "Class": event["subject"] or "Activity not identified",
+                            "Room": event["room_id"],
+                        }
+                    )
+                timetable_frame = pd.DataFrame(timetable_rows).sort_values(
+                    ["_period_start", "Program"]
+                ).drop(columns=["_period_start"])
+                st.dataframe(
+                    timetable_frame,
+                    use_container_width=True,
+                    hide_index=True,
+                )
+                st.caption(
+                    "The timetable PDFs contain schedules for multiple programs "
+                    "and are not linked to individual student accounts."
+                )
+
+        with history_tab:
             st.markdown("### Booking History")
             if history:
-                st.dataframe(booking_history_frame(history), use_container_width=True, hide_index=True)
+                st.dataframe(
+                    booking_history_frame(history),
+                    use_container_width=True,
+                    hide_index=True,
+                )
             else:
                 st.info("No bookings yet.")
 

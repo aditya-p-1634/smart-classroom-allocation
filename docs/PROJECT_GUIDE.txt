@@ -134,14 +134,23 @@ production credentials.
 4.2 Student dashboard
 
 The student dashboard identifies the logged-in sample student and shows
-two main areas:
+three main areas:
   - Find a room: enter booking details, view matching availability, and
     confirm a reservation.
+  - Today's timetable: view the schedule for the current local date by
+    selecting an Odd/Even timetable and program.
   - Booking History: see reservations associated with that student's
     roll number.
 
 Students do not select a subject in the current UI. Student reservations
 are saved with the course code "General".
+
+The timetable PDFs include schedules for multiple programs, but the
+sample student accounts are not mapped to a semester or program. The
+student selects the timetable and program to display; this view is not
+personalized to the student's enrollment. The displayed weekday comes
+from the computer's local system date. Weekend schedules are not present
+in the supplied PDFs.
 
 4.3 Admin dashboard
 
@@ -220,11 +229,17 @@ matching weekday from the chosen Odd or Even timetable.
 The timetable extractor uses pdfplumber to locate:
   - the P1-P8 column positions;
   - weekday row positions;
-  - room labels in each timetable cell.
+  - room labels in each timetable cell;
+  - program and activity text for the student daily schedule.
 
 Room labels that fall between two period columns are treated as a
 double-period activity, consistent with lab entries in the timetable.
 Extracted events are cached for the Streamlit process.
+
+For the student Today's timetable view, the app uses the local system
+date to select the weekday and reads activity names, rooms, and periods
+from the chosen semester and program in the supplied PDFs. It does not
+infer a student's semester or program from their sample account.
 
 Time choices correspond to the timetable periods:
   P1  8:30 AM - 9:20 AM
@@ -293,9 +308,9 @@ src/app.py is organized into these functional areas:
      weekday/time periods, sample users, course codes, and room catalogs.
 
   C. load_timetable_data()
-     Opens both timetable PDFs, extracts room/day/period events, and
-     discovers lab room IDs. Cached to avoid parsing PDFs on each UI
-     rerun.
+     Opens both timetable PDFs, extracts room/day/period events and
+     daily schedule entries, and discovers lab room IDs. Cached to avoid
+     parsing PDFs on each UI rerun.
 
   D. Booking persistence
      ensure_bookings_file() creates the CSV with expected columns.
@@ -306,11 +321,13 @@ src/app.py is organized into these functional areas:
      room_choices() and room_catalog() combine configured and
      timetable-discovered room IDs.
 
-  F. Conflict and time helpers
+  F. Conflict, timetable, and time helpers
      time_slot_index() normalizes current 12-hour and legacy 24-hour
      time labels.
      is_room_conflict() checks timetable occupancy and saved bookings.
      booking_history_frame() formats booking rows for display.
+     get_daily_timetable() selects a program's entries for the local
+     weekday.
 
   G. Availability matching
      get_room_availability() calculates conflict state and verifies
@@ -325,7 +342,8 @@ src/app.py is organized into these functional areas:
      and get_admin_history() support login and history views.
 
   J. Main screen and dashboards
-     Renders login, student booking/history, and admin booking/history.
+     Renders login, student booking/today's timetable/history, and
+     admin booking/history/access management.
 
 
 ======================================================================
@@ -370,6 +388,8 @@ records.
   - Admin blocking and unblocking of student accounts, persisted in
     data\blocked_users.csv.
   - Student-specific reservation history.
+  - Student Today's timetable view using the local system date, with
+    Odd/Even timetable and program selection.
   - Admin booking for a selected course code.
   - Admin history covering student and admin records.
   - History filters for course, room, and date range.

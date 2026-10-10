@@ -28,6 +28,7 @@ designed for simultaneous production use.”
 - Filter by semester timetable, date, time, duration, capacity, and projector.
 - Avoid conflicts with scheduled classes and saved reservations.
 - Student and administrator booking histories.
+- Student view of today's schedule from the supplied Odd/Even timetable PDFs.
 - Admin tools to block or unblock student accounts.
 - Save bookings and student access status locally as CSV files.
 - Blue-accented interface with 12-hour time labels.
@@ -68,12 +69,15 @@ These built-in accounts are for demonstration only—not real credentials:
 ## How it works
 
 1. The user signs in as a student or admin.
-2. The user selects a date, start time, number of periods, room type, and
-   optional capacity/projector requirements.
-3. The app parses the matching weekday from the Odd or Even timetable PDF and
-   checks saved reservations for overlapping periods.
-4. It lists rooms that are both free and suitable.
-5. When a room is booked, availability is checked again before the booking is
+2. Students can open Today's timetable. The app uses the computer's local
+   date to choose the weekday and displays the selected Odd/Even program
+   schedule from the timetable PDFs.
+3. For a room search, the user selects a date, start time, number of periods,
+   room type, and optional capacity/projector requirements.
+4. The app checks the matching weekday from the selected timetable and saved
+   reservations for overlapping periods.
+5. It lists rooms that are both free and suitable.
+6. When a room is booked, availability is checked again before the booking is
    saved.
 
 ## Project structure
@@ -105,6 +109,8 @@ These built-in accounts are for demonstration only—not real credentials:
 ## Current limitations
 
 - Demo users and passwords are stored in the source code.
+- Student accounts are not linked to a semester or program, so students select
+  which supplied schedule to view; the timetable is not personalized.
 - CSV storage is suitable for a local demonstration, not concurrent production
   use.
 - Timetable parsing depends on the supplied PDF layout.
