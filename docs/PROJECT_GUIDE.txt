@@ -355,18 +355,17 @@ Open PowerShell in the project folder:
   git clone https://github.com/aditya-p-1634/smart-classroom-allocation.git
   cd smart-classroom-allocation
 
-Create a virtual environment (optional if using the existing .venv):
+Create a local virtual environment if one does not already exist:
 
   py -m venv .venv
-  .\.venv\Scripts\Activate.ps1
 
-Install the project packages:
+Install the project packages without activating the environment:
 
-  python -m pip install -r requirements.txt
+  .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
 Start the local app:
 
-  python -m streamlit run src\app.py
+  .\.venv\Scripts\python.exe -m streamlit run src\app.py
 
 Open this address in a browser:
 

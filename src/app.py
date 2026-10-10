@@ -1317,16 +1317,18 @@ else:
             )
             selected_program = st.selectbox(
                 "Program",
-                ["All programs"] + programs,
+                ["Select a program"] + programs,
                 key=f"student_timetable_program_{semester.lower()}",
             )
             day_schedule = get_daily_timetable(
                 semester,
                 today,
-                program=None if selected_program == "All programs" else selected_program,
+                program=None if selected_program == "Select a program" else selected_program,
             )
             if today.weekday() >= len(DAYS):
                 st.info("The provided timetable PDFs do not include weekend classes.")
+            elif selected_program == "Select a program":
+                st.info("Select your program to view its timetable.")
             elif not day_schedule:
                 st.info("No scheduled classes were found for this day and selection.")
             else:
